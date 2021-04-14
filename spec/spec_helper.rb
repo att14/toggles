@@ -3,6 +3,8 @@ require 'rspec/temp_dir'
 
 require "toggles"
 
+Bundler.require(:test)
+
 RSpec.configure do |config|
   config.order = "random"
 

@@ -17,7 +17,7 @@ describe Toggles do
       Toggles.configure do |c|
         c.features_dir = temp_dir
       end
-      
+
       expect(Feature::Foo::Users.enabled_for?(id: 1)).to eq(true)
       expect(Feature::Bar::Users.enabled_for?(id: 3)).to eq(true)
     end
@@ -36,7 +36,7 @@ describe Toggles do
       Toggles.configure do |c|
         c.features_dir = temp_dir
       end
-      
+
       expect(Feature::Foo::Users.enabled_for?(id: 1)).to eq(true)
       expect(Feature::Foo::Children.enabled_for?(id: 1)).to eq(true)
 
@@ -49,7 +49,10 @@ describe Toggles do
       Toggles.init
 
       expect(Feature::Foo::Users.enabled_for?(id: 1)).to eq(false)
-      expect { Feature::Foo::Children.enabled_for?(id: 1) }.to raise_error(NameError)
+      expect { Feature::Bar::Children.enabled_for?(id: 1) }
+        .to raise_error(Feature::ConstantLookup::Error, 'Feature::Bar')
+      expect { Feature::Foo::Children.enabled_for?(id: 1) }
+        .to raise_error(Feature::ConstantLookup::Error, 'Feature::Foo::Children')
     end
   end
 

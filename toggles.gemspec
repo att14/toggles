@@ -16,9 +16,6 @@ Gem::Specification.new do |s|
   EOF
 
   s.add_development_dependency "bundler"
-  s.add_development_dependency "pry"
-  s.add_development_dependency "pry-nav"
-  s.add_development_dependency "pry-remote"
   s.add_development_dependency "rake"
   s.add_development_dependency "rspec"
   s.add_development_dependency "rspec-its"

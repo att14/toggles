@@ -19,63 +19,25 @@ module Toggles
     @configuration ||= Configuration.new
   end
 
-  # Dynamically create modules and classes within the `Feature` module based on
-  # the directory structure of `features`.
-  #
-  # For example if the `features` directory has the structure:
-  #
-  # features
-  # ├── thing
-  # |   ├── one.yml
-  # |   └── two.yml
-  # └── test.yml
-  #
-  # `Feature::Test`, `Feature::Thing::One`, `Feature::Thing::Two` would be
-  # available by default.
-  #
   def init
     return unless Dir.exists? configuration.features_dir
-
-    new_tree = Module.new
 
     top_level = File.realpath(configuration.features_dir)
     top_level_p = Pathname.new(top_level)
 
-    Find.find(top_level) do |path|
-      previous = new_tree
-      abspath = path
-      path = Pathname.new(path).relative_path_from(top_level_p).to_s
-      if path.match(/\.ya?ml\Z/)
-        base = path.chomp(File.extname(path)).split("/")
-        if base.size > 1
-          directories = base[0...-1]
-          filename = base[-1]
-        else
-          directories = []
-          filename = base[0]
-        end
+    Feature.features.clear
 
-        directories.each do |directory|
-          module_name = directory.split("_").map(&:capitalize).join.to_sym
-          previous    = if previous.constants.include? module_name
-                          previous.const_get(module_name)
-                        else
-                          previous.const_set(module_name, Module.new)
-                        end
-        end
-
-        cls = Class.new(Feature::Base) do |c|
-          c.const_set(:PERMISSIONS, Feature::Permissions.new(abspath))
-        end
-
-        previous.const_set(filename.split("_").map(&:capitalize).join.to_sym, cls)
+    Dir[File.join(top_level, "**/*.{yaml,yml}")].each do |abspath|
+      path = Pathname.new(abspath).relative_path_from(top_level_p).to_s
+      features = path.split("/")[0..-2].inject(Feature.features) { |a,e| a[e.to_sym] ||= {} }
+      feature_key = File.basename(path, File.extname(path)).to_sym
+      features[feature_key] = Class.new(Feature::Base) do |c|
+        c.const_set(:PERMISSIONS, Feature::Permissions.new(abspath))
       end
     end
 
     stbuf = File.stat(top_level)
     @stat_tuple = StatResult.new(stbuf.ino, stbuf.mtime)
-
-    Feature.set_tree(new_tree)
   end
 
   def reinit_if_changed

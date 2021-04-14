@@ -12,13 +12,33 @@ module Feature
                 or:    Operation::Or,
                 range: Operation::Range}
 
-  @@tree = Module.new
+  Error = Class.new(StandardError)
+  Unknown = Class.new(Error)
 
-  def self.set_tree(tree)
-    @@tree = tree
+  def self.features
+    @features ||= {}
   end
 
+  # @deprecated This is an abuse of lazy dispatch that creates cryptic errors
   def self.const_missing(sym)
-    @@tree.const_get(sym, inherit: false)
+    ConstantLookup.from(features, [:Feature]).const_missing(sym)
+  end
+
+  def self.enabled?(*sym, **criteria)
+    sym
+      .inject(features) { |a, e| a.fetch(e) }
+      .enabled_for?(criteria)
+  rescue KeyError
+    raise Unknown, sym.inspect
+  end
+
+  def self.disabled?(*sym, **criteria)
+    sym
+      .inject(features) { |a, e| a.fetch(e) }
+      .disabled_for?(criteria)
+  rescue KeyError
+    raise Unknown, sym.inspect
   end
 end
+
+require 'toggles/constant_lookup'

@@ -41,9 +41,6 @@ features
 └── test.yml
 ```
 
-The classes `Feature::Test`, `Feature::Thing::One` and `Feature::Thing::Two` will be available for use within
-your application.
-
 You can call the `Toggles.init` method to force re-parsing the configuration and re-initializing all Features
 structures at any time. The `Toggles.reinit_if_necessary` method is a convenience helper which will only
 re-initialize of the top-level features directory has changed. Note that, in general, this will only detect
@@ -65,13 +62,13 @@ user:
 Check if the feature is enabled or disabled:
 
 ```ruby
-Feature::NewFeature::AvailableForPresentation.enabled_for?(user: OpenStruct.new(id: 12345)) # true
-Feature::NewFeature::AvailableForPresentation.enabled_for?(user: OpenStruct.new(id: 54321)) # true
-Feature::NewFeature::AvailableForPresentation.enabled_for?(user: OpenStruct.new(id: 7)) # false
+Feature.enabled?(:new_feature, :available_for_presentation, user: OpenStruct.new(id: 12345)) # true
+Feature.enabled?(:new_feature, :available_for_presentation, user: OpenStruct.new(id: 54321)) # true
+Feature.enabled?(:new_feature, :available_for_presentation, user: OpenStruct.new(id: 7)) # false
 
-Feature::NewFeature::AvailableForPresentation.disabled_for?(user: OpenStruct.new(id: 12345)) # false
-Feature::NewFeature::AvailableForPresentation.disabled_for?(user: OpenStruct.new(id: 54321)) # false
-Feature::NewFeature::AvailableForPresentation.disabled_for?(user: OpenStruct.new(id: 7)) # true
+Feature.disabled?(:new_feature, :available_for_presentation, user: OpenStruct.new(id: 12345)) # false
+Feature.disabled?(:new_feature, :available_for_presentation, user: OpenStruct.new(id: 54321)) # false
+Feature.disabled?(:new_feature, :available_for_presentation, user: OpenStruct.new(id: 7)) # true
 ```
 
 ## License
